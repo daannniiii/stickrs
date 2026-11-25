@@ -5,17 +5,46 @@ import { attachDatabasePool } from "@vercel/functions";
 const { Pool } = pg;
 
 let pool;
+let tablesInitialized = false;
 
 export function getPool() {
   if (!pool) {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
-      throw new Error("DATABASE_URL environment variable is not configured.");
+      throw new Error(
+        "DATABASE_URL is not configured. Add DATABASE_URL in Vercel Project Settings -> Environment Variables."
+      );
     }
     pool = new Pool({ connectionString });
-    attachDatabasePool(pool);
+    try {
+      attachDatabasePool(pool);
+    } catch {
+      // Safe no-op outside Vercel Fluid compute
+    }
   }
   return pool;
+}
+
+export async function ensureTables(activePool) {
+  if (tablesInitialized) return;
+  await activePool.query(`
+    CREATE TABLE IF NOT EXISTS tags (
+      id TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await activePool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      image_url TEXT NOT NULL,
+      inventory_count INTEGER NOT NULL DEFAULT 0,
+      tags TEXT[] NOT NULL DEFAULT '{}',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  tablesInitialized = true;
 }
 
 export function setCors(res, methods = "GET, POST, PUT, DELETE, OPTIONS") {

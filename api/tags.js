@@ -1,13 +1,14 @@
 // Vercel Serverless Function — Tags CRUD (Neon Lakebase Postgres)
-import { getPool, setCors, slugify, verifyAdmin } from "./_db.js";
+import { ensureTables, getPool, setCors, slugify, verifyAdmin } from "./_db.js";
 
 export default async function handler(req, res) {
   setCors(res, "GET, POST, DELETE, OPTIONS");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const pool = getPool();
-
   try {
+    const pool = getPool();
+    await ensureTables(pool);
+
     if (req.method === "GET") {
       const { rows } = await pool.query(
         `SELECT t.id, t.label, t.created_at AS "createdAt",

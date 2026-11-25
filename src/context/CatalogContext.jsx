@@ -12,6 +12,17 @@ function getProductTags(product) {
   return Array.from(set);
 }
 
+async function parseJsonSafe(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      text?.slice(0, 140) || `Server returned HTTP ${res.status} (non-JSON response)`
+    );
+  }
+}
+
 export function CatalogProvider({ children }) {
   const { token } = useAuth();
   const [products, setProducts] = useState([]);
@@ -26,8 +37,8 @@ export function CatalogProvider({ children }) {
         fetch("/api/products"),
         fetch("/api/tags"),
       ]);
-      const prodData = await prodRes.json();
-      const tagData = await tagRes.json();
+      const prodData = await parseJsonSafe(prodRes);
+      const tagData = await parseJsonSafe(tagRes);
 
       if (!prodRes.ok) throw new Error(prodData.error || "Failed to load products");
       if (!tagRes.ok) throw new Error(tagData.error || "Failed to load tags");
@@ -60,7 +71,7 @@ export function CatalogProvider({ children }) {
         headers: authHeaders(),
         body: JSON.stringify({ name, image, inventoryCount, tags }),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.error || "Failed to add product");
       await refreshCatalog();
       return data.product;
@@ -75,7 +86,7 @@ export function CatalogProvider({ children }) {
         headers: authHeaders(),
         body: JSON.stringify({ id, ...updates }),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.error || "Failed to update product");
       await refreshCatalog();
       return data.product;
@@ -89,7 +100,7 @@ export function CatalogProvider({ children }) {
         method: "DELETE",
         headers: authHeaders(),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.error || "Failed to delete product");
       await refreshCatalog();
     },
@@ -103,7 +114,7 @@ export function CatalogProvider({ children }) {
         headers: authHeaders(),
         body: JSON.stringify({ label }),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.error || "Failed to create tag");
       await refreshCatalog();
       return data.tag.id;
@@ -117,7 +128,7 @@ export function CatalogProvider({ children }) {
         method: "DELETE",
         headers: authHeaders(),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.error || "Failed to delete tag");
       await refreshCatalog();
     },

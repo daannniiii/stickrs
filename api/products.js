@@ -1,5 +1,5 @@
 // Vercel Serverless Function — Products CRUD (Neon Lakebase Postgres)
-import { getPool, setCors, verifyAdmin } from "./_db.js";
+import { ensureTables, getPool, setCors, verifyAdmin } from "./_db.js";
 
 function mapProduct(row) {
   return {
@@ -17,9 +17,10 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const pool = getPool();
-
   try {
+    const pool = getPool();
+    await ensureTables(pool);
+
     if (req.method === "GET") {
       const { rows } = await pool.query(
         `SELECT id, name, image_url, inventory_count, tags, created_at
