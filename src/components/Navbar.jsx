@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import logoImg from "../assets/stickr.logo.png";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function Navbar() {
       <div className="navbar-inner">
         {/* Brand */}
         <Link to="/" className="navbar-brand">
-          <span className="brand-icon">🏷️</span>
+          <img src={logoImg} alt="Stickr logo" className="brand-logo" />
           <span className="brand-name">Stickr</span>
         </Link>
 
