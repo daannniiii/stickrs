@@ -68,51 +68,57 @@ export default function FilterPanel({
         </button>
 
         {expanded && (
-          <ul className="filter-list">
-            {visibleCategories.map((cat) => {
-              const checked = selectedCategories.includes(cat.id);
-              return (
-                <li key={cat.id} className="filter-item">
-                  <label className="filter-item-label">
-                    <span
-                      className={`custom-checkbox ${checked ? "checked" : ""}`}
-                      onClick={() => onToggle(cat.id)}
-                      role="checkbox"
-                      aria-checked={checked}
-                      tabIndex={0}
-                      onKeyDown={(e) =>
-                        (e.key === "Enter" || e.key === " ") && onToggle(cat.id)
-                      }
-                    >
-                      {checked && (
-                        <svg
-                          viewBox="0 0 12 10"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="check-icon"
-                        >
-                          <path
-                            d="M1 5L4.5 8.5L11 1"
-                            stroke="white"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </span>
-                    <span
-                      className={`cat-name ${checked ? "cat-name--active" : ""}`}
-                      onClick={() => onToggle(cat.id)}
-                    >
-                      {cat.label}{" "}
-                      <span className="cat-count">({cat.count})</span>
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
+          categories.length === 0 ? (
+            <p className="cat-count" style={{ fontSize: "13px", padding: "4px 0" }}>
+              No categories added yet.
+            </p>
+          ) : (
+            <ul className="filter-list">
+              {visibleCategories.map((cat) => {
+                const checked = selectedCategories.includes(cat.id);
+                return (
+                  <li key={cat.id} className="filter-item">
+                    <label className="filter-item-label">
+                      <span
+                        className={`custom-checkbox ${checked ? "checked" : ""}`}
+                        onClick={() => onToggle(cat.id)}
+                        role="checkbox"
+                        aria-checked={checked}
+                        tabIndex={0}
+                        onKeyDown={(e) =>
+                          (e.key === "Enter" || e.key === " ") && onToggle(cat.id)
+                        }
+                      >
+                        {checked && (
+                          <svg
+                            viewBox="0 0 12 10"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="check-icon"
+                          >
+                            <path
+                              d="M1 5L4.5 8.5L11 1"
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </span>
+                      <span
+                        className={`cat-name ${checked ? "cat-name--active" : ""}`}
+                        onClick={() => onToggle(cat.id)}
+                      >
+                        {cat.label}{" "}
+                        <span className="cat-count">({cat.count})</span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )
         )}
 
         {expanded && categories.length > INITIAL_SHOW && (

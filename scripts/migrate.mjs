@@ -1,10 +1,9 @@
-// Schema migration & initial seed script.
+// Schema migration script (no seeded data).
 // Uses DATABASE_URL_UNPOOLED (direct connection) per Neon Postgres best practices.
 
 import fs from "fs";
 import path from "path";
 import pg from "pg";
-import { categories, products } from "../src/data/catalogData.js";
 
 function loadEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return;
@@ -63,41 +62,7 @@ async function migrate() {
       );
     `);
 
-    // Seed tags if table is empty
-    const { rows: tagCountRows } = await client.query(
-      "SELECT COUNT(*)::int AS count FROM tags"
-    );
-    if (tagCountRows[0].count === 0) {
-      for (const cat of categories) {
-        await client.query(
-          "INSERT INTO tags (id, label) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING",
-          [cat.id, cat.label]
-        );
-      }
-      console.log(`Seeded ${categories.length} tags.`);
-    }
-
-    // Seed products if table is empty
-    const { rows: prodCountRows } = await client.query(
-      "SELECT COUNT(*)::int AS count FROM products"
-    );
-    if (prodCountRows[0].count === 0) {
-      for (const prod of products) {
-        const prodTags = Array.isArray(prod.tags)
-          ? prod.tags
-          : prod.category
-            ? [prod.category]
-            : [];
-        await client.query(
-          `INSERT INTO products (name, image_url, inventory_count, tags)
-           VALUES ($1, $2, $3, $4)`,
-          [prod.name, prod.image, prod.inventoryCount ?? 10, prodTags]
-        );
-      }
-      console.log(`Seeded ${products.length} products.`);
-    }
-
-    console.log("Migration completed successfully.");
+    console.log("Migration completed successfully (no seed data).");
   } finally {
     await client.end();
   }
