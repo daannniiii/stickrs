@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCatalog } from "../context/CatalogContext";
-import { uploadToCloudinary } from "../utils/cloudinaryUpload";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinaryUpload";
 
 export default function AdminDashboardPage() {
   const { isAdmin, token, logout } = useAuth();
@@ -15,6 +15,7 @@ export default function AdminDashboardPage() {
     updateProduct,
     deleteProduct,
     addCategory,
+    renameCategory,
     deleteCategory,
   } = useCatalog();
   const navigate = useNavigate();
@@ -22,17 +23,21 @@ export default function AdminDashboardPage() {
   // Add-product form state
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imagePublicId, setImagePublicId] = useState("");
   const [inventoryCount, setInventoryCount] = useState(1);
   const [selectedTags, setSelectedTags] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [deletingImage, setDeletingImage] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
 
-  // New-tag input state
+  // New-tag & rename-tag state
   const [newTagName, setNewTagName] = useState("");
   const [tagError, setTagError] = useState("");
+  const [renamingTagId, setRenamingTagId] = useState(null);
+  const [renameTagLabel, setRenameTagLabel] = useState("");
 
   // Product list search & inline editing
   const [search, setSearch] = useState("");
@@ -53,12 +58,29 @@ export default function AdminDashboardPage() {
     setUploadError("");
     setUploading(true);
     try {
-      const url = await uploadToCloudinary(file, token);
+      const { url, publicId } = await uploadToCloudinary(file, token);
       setImageUrl(url);
+      setImagePublicId(publicId);
     } catch (err) {
       setUploadError(err.message || "Failed to upload image to Cloudinary.");
     } finally {
       setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteUploadedImage = async () => {
+    if (!imageUrl) return;
+    setUploadError("");
+    setDeletingImage(true);
+    try {
+      await deleteFromCloudinary({ publicId: imagePublicId, imageUrl }, token);
+      setImageUrl("");
+      setImagePublicId("");
+    } catch (err) {
+      setUploadError(err.message || "Failed to delete image from Cloudinary.");
+    } finally {
+      setDeletingImage(false);
     }
   };
 
@@ -78,6 +100,25 @@ export default function AdminDashboardPage() {
       setNewTagName("");
     } catch (err) {
       setTagError(err.message || "Failed to create tag.");
+    }
+  };
+
+  const startRenameTag = (cat) => {
+    setTagError("");
+    setRenamingTagId(cat.id);
+    setRenameTagLabel(cat.label);
+  };
+
+  const handleSaveRenameTag = async (e, id) => {
+    e.preventDefault();
+    setTagError("");
+    if (!renameTagLabel.trim()) return;
+    try {
+      await renameCategory(id, renameTagLabel);
+      setRenamingTagId(null);
+      setRenameTagLabel("");
+    } catch (err) {
+      setTagError(err.message || "Failed to rename tag.");
     }
   };
 
@@ -102,6 +143,7 @@ export default function AdminDashboardPage() {
       });
       setName("");
       setImageUrl("");
+      setImagePublicId("");
       setInventoryCount(1);
       setSelectedTags([]);
       setFormSuccess("Product saved to Neon Postgres!");
@@ -211,7 +253,7 @@ export default function AdminDashboardPage() {
                     accept="image/*"
                     onChange={handleFileUpload}
                     hidden
-                    disabled={uploading}
+                    disabled={uploading || deletingImage}
                   />
                   {uploading ? (
                     <span>Uploading to Cloudinary...</span>
@@ -226,13 +268,28 @@ export default function AdminDashboardPage() {
                   className="form-input"
                   placeholder="Or paste image URL directly"
                   value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    setImagePublicId("");
+                  }}
                   required
                 />
 
                 {imageUrl && (
-                  <div className="image-preview-box">
-                    <img src={imageUrl} alt="Preview" />
+                  <div className="image-preview-wrapper">
+                    <div className="image-preview-box">
+                      <img src={imageUrl} alt="Preview" />
+                    </div>
+                    <div className="image-preview-actions">
+                      <button
+                        type="button"
+                        className="btn-outline-danger btn-sm"
+                        onClick={handleDeleteUploadedImage}
+                        disabled={deletingImage}
+                      >
+                        {deletingImage ? "Deleting..." : "🗑 Delete Image"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -262,7 +319,7 @@ export default function AdminDashboardPage() {
               <button
                 type="submit"
                 className="btn-primary btn-full"
-                disabled={uploading || saving}
+                disabled={uploading || deletingImage || saving}
               >
                 {saving ? "Saving..." : "+ Add Product"}
               </button>
@@ -287,22 +344,63 @@ export default function AdminDashboardPage() {
             {tagError && <p className="form-error">{tagError}</p>}
 
             <ul className="admin-tag-list">
-              {categories.map((cat) => (
-                <li key={cat.id} className="admin-tag-item">
-                  <span>
-                    <strong>{cat.label}</strong>{" "}
-                    <span className="cat-count">({cat.count})</span>
-                  </span>
-                  <button
-                    type="button"
-                    className="btn-icon-danger"
-                    onClick={() => deleteCategory(cat.id)}
-                    title={`Delete ${cat.label}`}
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
+              {categories.map((cat) => {
+                const isRenaming = renamingTagId === cat.id;
+                return (
+                  <li key={cat.id} className="admin-tag-item">
+                    {isRenaming ? (
+                      <form
+                        onSubmit={(e) => handleSaveRenameTag(e, cat.id)}
+                        className="admin-tag-rename-row"
+                      >
+                        <input
+                          type="text"
+                          className="form-input form-input--sm"
+                          value={renameTagLabel}
+                          onChange={(e) => setRenameTagLabel(e.target.value)}
+                          autoFocus
+                          required
+                        />
+                        <button type="submit" className="btn-primary btn-sm">
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-secondary btn-sm"
+                          onClick={() => setRenamingTagId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </form>
+                    ) : (
+                      <>
+                        <span>
+                          <strong>{cat.label}</strong>{" "}
+                          <span className="cat-count">({cat.count})</span>
+                        </span>
+                        <div className="admin-tag-actions">
+                          <button
+                            type="button"
+                            className="btn-secondary btn-sm"
+                            onClick={() => startRenameTag(cat)}
+                            title={`Rename ${cat.label}`}
+                          >
+                            Rename
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon-danger"
+                            onClick={() => deleteCategory(cat.id)}
+                            title={`Delete ${cat.label}`}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </section>
         </div>

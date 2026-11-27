@@ -13,6 +13,7 @@ export default function AboutPage() {
           Every sticker is printed on durable, weather-resistant vinyl with
           vibrant colours that last. Browse our catalog, pick your favourites,
           and reach out to place your order!
+          you can please order on your <a href="https://www.instagram.com/stickr.uet">instagram Page </a>
         </p>
       </div>
     </main>

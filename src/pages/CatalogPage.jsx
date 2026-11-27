@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import FilterPanel from "../components/FilterPanel";
 import ProductGrid from "../components/ProductGrid";
+import AnnouncementBar from "../components/AnnouncementBar";
 import { useCatalog } from "../context/CatalogContext";
 import { useFilters } from "../hooks/useFilters";
 
@@ -18,7 +19,9 @@ export default function CatalogPage() {
   }, [products, selectedCategories, getProductTags]);
 
   return (
-    <main className="catalog-layout">
+    <>
+      <AnnouncementBar />
+      <main className="catalog-layout">
       {/* Mobile filter toggle */}
       <div className="mobile-filter-bar">
         <button
@@ -87,5 +90,6 @@ export default function CatalogPage() {
         </section>
       </div>
     </main>
+    </>
   );
 }

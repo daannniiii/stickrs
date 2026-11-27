@@ -5,12 +5,8 @@ export default function ContactPage() {
         <h1>Contact Us</h1>
         <p>Have a question or want to place a custom order? Reach out to us!</p>
         <ul className="contact-list">
-          <li>
-            📧{" "}
-            <a href="mailto:hello@stickr.store">hello@stickr.store</a>
-          </li>
-          <li>📱 WhatsApp: +92-XXX-XXXXXXX</li>
-          <li>📍 Lahore, Pakistan</li>
+          <li>📱 Instagram: <a href="https://www.instagram.com/stickr.uet">stickr.uet</a></li>
+          <li>📍 UET Lahore, Pakistan</li>
         </ul>
       </div>
     </main>

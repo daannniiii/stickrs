@@ -1,6 +1,10 @@
+import { useState } from "react";
 import ProductCard from "./ProductCard";
+import ImageLightbox from "./ImageLightbox";
 
 export default function ProductGrid({ products }) {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   if (products.length === 0) {
     return (
       <div className="empty-state">
@@ -12,10 +16,23 @@ export default function ProductGrid({ products }) {
   }
 
   return (
-    <div className="product-grid">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <>
+      <div className="product-grid">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onSelect={setSelectedProduct}
+          />
+        ))}
+      </div>
+
+      {selectedProduct && (
+        <ImageLightbox
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+    </>
   );
 }

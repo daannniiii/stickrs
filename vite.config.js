@@ -55,6 +55,7 @@ function localApiPlugin(env) {
     configureServer(server) {
       mountVercelHandler(server, '/api/auth', () => import('./api/auth.js'))
       mountVercelHandler(server, '/api/sign-upload', () => import('./api/sign-upload.js'))
+      mountVercelHandler(server, '/api/delete-image', () => import('./api/delete-image.js'))
       mountVercelHandler(server, '/api/products', () => import('./api/products.js'))
       mountVercelHandler(server, '/api/tags', () => import('./api/tags.js'))
     },

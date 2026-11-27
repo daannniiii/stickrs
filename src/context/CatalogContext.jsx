@@ -122,6 +122,21 @@ export function CatalogProvider({ children }) {
     [authHeaders, refreshCatalog]
   );
 
+  const renameCategory = useCallback(
+    async (id, label) => {
+      const res = await fetch("/api/tags", {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ id, label }),
+      });
+      const data = await parseJsonSafe(res);
+      if (!res.ok) throw new Error(data.error || "Failed to rename tag");
+      await refreshCatalog();
+      return data.tag;
+    },
+    [authHeaders, refreshCatalog]
+  );
+
   const deleteCategory = useCallback(
     async (id) => {
       const res = await fetch(`/api/tags?id=${encodeURIComponent(id)}`, {
@@ -148,6 +163,7 @@ export function CatalogProvider({ children }) {
         updateProduct,
         deleteProduct,
         addCategory,
+        renameCategory,
         deleteCategory,
       }}
     >

@@ -1,4 +1,5 @@
 // Vercel Serverless Function — Products CRUD (Neon Lakebase Postgres)
+import { destroyCloudinaryImage } from "./_cloudinary.js";
 import { ensureTables, getPool, setCors, verifyAdmin } from "./_db.js";
 
 function mapProduct(row) {
@@ -96,9 +97,20 @@ export default async function handler(req, res) {
       if (!numericId) {
         return res.status(400).json({ error: "Valid product id is required." });
       }
-      const { rowCount } = await pool.query("DELETE FROM products WHERE id = $1", [numericId]);
-      if (rowCount === 0) {
+      const { rows } = await pool.query(
+        "DELETE FROM products WHERE id = $1 RETURNING image_url",
+        [numericId]
+      );
+      if (rows.length === 0) {
         return res.status(404).json({ error: "Product not found." });
+      }
+      // Best-effort cleanup of the image on Cloudinary
+      if (rows[0].image_url) {
+        try {
+          await destroyCloudinaryImage({ imageUrl: rows[0].image_url });
+        } catch (cloudErr) {
+          console.warn("Cloudinary cleanup warning:", cloudErr.message);
+        }
       }
       return res.status(200).json({ deletedId: numericId });
     }

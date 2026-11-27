@@ -1,4 +1,4 @@
-// Uploads an image file directly to Cloudinary using a server-signed signature.
+// Uploads & deletes images on Cloudinary using server-signed endpoints.
 
 export async function uploadToCloudinary(file, token) {
   const signRes = await fetch("/api/sign-upload", {
@@ -28,5 +28,24 @@ export async function uploadToCloudinary(file, token) {
     throw new Error(uploadData.error?.message || "Cloudinary upload failed");
   }
 
-  return uploadData.secure_url;
+  return {
+    url: uploadData.secure_url,
+    publicId: uploadData.public_id,
+  };
+}
+
+export async function deleteFromCloudinary({ publicId, imageUrl }, token) {
+  const res = await fetch("/api/delete-image", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ publicId, imageUrl }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to delete image from Cloudinary");
+  }
+  return data;
 }

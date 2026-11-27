@@ -1,5 +1,5 @@
 // Vercel Serverless Function — Cloudinary Signed Upload
-import crypto from "crypto";
+import { signCloudinaryParams } from "./_cloudinary.js";
 import { setCors, verifyAdmin } from "./_db.js";
 
 export default function handler(req, res) {
@@ -24,18 +24,7 @@ export default function handler(req, res) {
 
   const timestamp = Math.round(Date.now() / 1000);
   const folder = "stickr-catalog";
-
-  const paramsToSign = { folder, timestamp };
-  const signatureString =
-    Object.keys(paramsToSign)
-      .sort()
-      .map((k) => `${k}=${paramsToSign[k]}`)
-      .join("&") + apiSecret;
-
-  const signature = crypto
-    .createHash("sha1")
-    .update(signatureString)
-    .digest("hex");
+  const signature = signCloudinaryParams({ folder, timestamp }, apiSecret);
 
   return res.status(200).json({
     signature,

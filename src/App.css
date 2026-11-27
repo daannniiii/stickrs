@@ -939,3 +939,225 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     grid-template-columns: 1fr;
   }
 }
+
+.image-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.image-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-tag-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-tag-rename-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.form-input--sm {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.product-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+/* ============================================================
+   FULLSCREEN IMAGE LIGHTBOX & ZOOM
+   ============================================================ */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 18, 0.92);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.lightbox-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+}
+
+.lightbox-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.lightbox-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.lightbox-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lightbox-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lightbox-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.lightbox-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.24);
+}
+.lightbox-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.lightbox-close {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+.lightbox-close:hover {
+  background: rgba(239, 68, 68, 0.45) !important;
+}
+
+.lightbox-zoom-label {
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 44px;
+  text-align: center;
+}
+
+.lightbox-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  cursor: zoom-in;
+  touch-action: none;
+}
+.lightbox-stage.is-zoomed {
+  cursor: grab;
+}
+.lightbox-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  transition: transform 0.08s ease-out;
+}
+.lightbox-stage.is-dragging .lightbox-image {
+  transition: none;
+}
+
+.lightbox-hint {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+  padding: 10px 16px 14px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Disable image download context menu & callout on mobile and desktop */
+.no-save-img {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  pointer-events: auto;
+}
+
+/* ============================================================
+   CONTINUOUS MOVING ANNOUNCEMENT STRIP (MARQUEE)
+   ============================================================ */
+.ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(90deg, #15803d, #22c55e, #16a34a);
+  color: #ffffff;
+  padding: 10px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.ticker-content {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  animation: ticker-slide 28s linear infinite;
+}
+
+/* Pause on hover so the user can easily read or interact */
+.ticker-wrap:hover .ticker-content {
+  animation-play-state: paused;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.ticker-separator {
+  margin: 0 24px;
+  opacity: 0.6;
+  font-size: 11px;
+}
+
+@keyframes ticker-slide {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
