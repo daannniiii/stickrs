@@ -2,7 +2,7 @@ export default function AnnouncementBar({
   messages = [
     "Welcome to Stickr — Premium Waterproof Vinyl Stickers!",
     "Custom designs & bulk orders available via Instagram",
-    "We only provide these stickers within UET Lahore:)",
+    "We only provide these stickers in UET Lahore:)",
     "Feel free to ask any question",
   ],
 }) {
